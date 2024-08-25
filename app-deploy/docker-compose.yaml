@@ -1,0 +1,72 @@
+version: "3"  
+
+services:
+  # backend:
+  #   # image: "http-be"
+  #   build: "./"
+  #   container_name: backend
+  #   restart: always
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     - PORT=3000
+  #     - DB_USER=postgres
+  #     - DB_PASSWORD=postgres
+  #     - DB_HOST=localhost
+  #     - DB_PORT=5432
+  #     - DB_NAME=postgres
+  #     - JWT_ACCESS_TOKEN=learn_express_jwt_auth_access_secret_key
+  #     - JWT_REFRESH_TOKEN=learn_express_jwt_auth_refresh_secret_key
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #   networks:
+  #     - main
+
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      main:
+        aliases:
+          - postgres
+    volumes:  
+      - ./data_local/pg:/var/lib/postgresql/data/
+      - ./settings/pg/init.sql:/docker-entrypoint-initdb.d/init.sql
+  
+  pgadmin:
+    image: "dpage/pgadmin4"
+    container_name: pgadmin
+    restart: on-failure
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=ltwixy@mail.com
+      - PGADMIN_DEFAULT_PASSWORD=postgres
+      - PGADMIN_LISTEN_PORT=4433
+    ports:
+      - "4434:4433"
+    volumes:
+      - "./settings/pgadmin/servers.json:/pgadmin4/servers.json"
+    networks:
+      - main
+
+volumes:
+  pgdata:
+
+networks:
+  main:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: "false"

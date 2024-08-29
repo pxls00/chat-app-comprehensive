@@ -1,12 +1,10 @@
-import { createRouter, createWebHistory } from "vue-router";
+import { createRouter, createWebHistory, type NavigationGuardNext, type RouteLocationNormalized } from "vue-router";
 
-// import $infra from "../infrastructure/index";
-// import $service from "../service/index";
+import $infrastructure from "../infrastructure/index";
+import $service from "../service/index";
 
 import MainLayout from "@/layouts/main-layout.vue";
 import AuthLayout from "@/layouts/auth-layout.vue";
-
-import type { RouteLocationNormalized, NavigationGuardNext } from "vue-router";
 
 
 const router = createRouter({
@@ -17,7 +15,7 @@ const router = createRouter({
       name: "auth",
       component: AuthLayout,
       beforeEnter (to, from, next) {
-        // beforeAuthRoute(next);
+        beforeAuthRoute(next);
       },
       redirect: {
         name: "auth-signin",  
@@ -28,6 +26,11 @@ const router = createRouter({
           name: "auth-signin",
           component: () => import("@/views/auth/auth-signin.vue"),
         },
+        {
+          path: "/signup",
+          name: "auth-signup",
+          component: () => import("@/views/auth/auth-signup.vue"),
+        },
       ],
     },
     {
@@ -35,17 +38,17 @@ const router = createRouter({
       name: "main",
       component: MainLayout,
       // alias: "/main",
-      // beforeEnter (to, from, next) {
-      //   beforeEachRoute(to, from, next);
-      // },
+      beforeEnter (to, from, next) {
+        beforeEachRoute(to, from, next);
+      },
       meta: { requiresAuth: true },
       redirect: {
-        name: "main-pages", 
+        name: "chat-page", 
       },
       children: [
         {
           path: "chat",
-          name: "main-pages",
+          name: "chat-page",
           meta: { requiresAuth: true },
           component: () => import("@/views/main/chat/chat.vue") 
         },
@@ -54,27 +57,24 @@ const router = createRouter({
   ],
 });
 
-// async function beforeEachRoute (to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) {
-//   try {
-//     console.log(localStorage.getItem("token"));
+async function beforeEachRoute (to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) {
+  try {
+    if (!localStorage.getItem("token")) {
+      const authResponse = await $infrastructure.auth.checkAuth();
 
-//     if (!localStorage.getItem("token")) {
-//       console.log("router doesnt exist so it redirected to auth");
-//       // const authResponse = await $infra.auth.checkAuth();
-//       await $service.auth.resetAuthData();
-    
-//       return next("/auth");
-//     }
-//     next();
-//   } catch (error) {
-//     next("/auth");
-//   }
-// }
+      await $service.auth.setAuthData(authResponse);
+    }
+    next();
+  } catch (error) {
+    console.log(error);
+    next("/auth");
+  }
+}
 
 // router.beforeEach(async (to: RouteLocationNormalized, from: RouteLocationNormalized) => {
 //   if (to.meta.requiresAuth && !localStorage.getItem("token")) {
 //     await $service.auth.resetAuthData();
-
+//     console.log("it is returning")
 //     return {
 //       path: "/signin",
 
@@ -84,18 +84,17 @@ const router = createRouter({
 // });
 
 
-// async function beforeAuthRoute (next: NavigationGuardNext) {
-//   try {
-//     // await $infra.auth.logout();
-    
-//     await $service.auth.resetAuthData();
+async function beforeAuthRoute (next: NavigationGuardNext) {
+  try {
+    await $infrastructure.auth.logout();
+    await $service.auth.resetAuthData();
 
-//   } catch (error) {
-//     console.log(error);
-//   } finally {
-//     next();
-//   }
-// }
+  } catch (error) {
+    console.log(error);
+  } finally {
+    next();
+  }
+}
 
 
 export default router;

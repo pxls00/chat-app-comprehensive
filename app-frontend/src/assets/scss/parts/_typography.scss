@@ -1,0 +1,40 @@
+
+.heading {
+  font-size: $fz-md;
+  font-weight: 700;
+  color: $color_white;
+  line-height: 1.3;
+  margin: 0px;
+  font-family: $montserrat;
+
+  &--extra-lg {
+    font-size: $h-lg;
+    font-weight: 700;
+  }
+
+  &--lg {
+    font-size: $h-md;
+    font-weight: 700;
+  }
+
+  &--md {
+    font-size: $fz-lg;
+  }
+
+  &--sm {
+    font-size: $fz-sm;
+    font-weight: 500;
+  }
+
+  &--xs {
+    font-size: $fz-xs;
+    font-weight: 400;
+  }
+  &--xxs {
+    font-size: $fz-xxs;
+    font-weight: 400;
+  }
+  &--myriadpro {
+    font-family: 'Myriad Pro';
+  }
+}

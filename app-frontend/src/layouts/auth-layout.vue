@@ -1,6 +1,6 @@
 <template>
-  <div class="auth-layout">
-    <div class="auth-content">
+  <div class="bg-black">
+    <div class="min-h-screen flex justify-center align-center p-[50px]">
       <RouterView />
     </div>
   </div>

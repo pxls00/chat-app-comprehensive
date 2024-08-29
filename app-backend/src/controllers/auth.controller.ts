@@ -5,6 +5,12 @@ import ApiError from "../utils/api-errors"
 import authService from "../services/auth.service"
 
 interface IRegisterReqBody {
+    name: string,
+    password: string,
+    email: string,
+}
+
+interface ILoginReqBody {
     password: string,
     email: string,
 }
@@ -19,8 +25,8 @@ class AuthController {
                 return next(ApiError.BadRequest("Validation error", errors.array()))
             }
             
-            const {email, password} = req.body       
-            const userWithTokens = await authService.register(email, password);
+            const {email, password, name} = req.body       
+            const userWithTokens = await authService.register(email, password, name);
 
             res.cookie(
                 "refreshToken", 
@@ -38,7 +44,7 @@ class AuthController {
         }
     }
 
-    async login(req: Request<any, any, IRegisterReqBody>, res:Response, next: (payload?:any) => void) {
+    async login(req: Request<any, any, ILoginReqBody>, res:Response, next: (payload?:any) => void) {
         try {
             const errors = validationResult(req)
 

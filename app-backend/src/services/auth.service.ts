@@ -8,16 +8,16 @@ import UserDTO from "../dtos/user-dto";
 import { IUser } from "../dtos/user-dto/user-dto.types";
 
 class AuthService {
-    async register(email: string, password: string) {
-        const candidate = await dbQuery('SELECT * FROM user WHERE email = $1', [email]);
+    async register(email: string, password: string, name: string) {
+        const candidate = await dbQuery('SELECT * FROM users WHERE email = $1', [email]);
         if(candidate?.rows?.[0]) {
             throw ApiError.BadRequest("User with this email already exists");
         }
 
         const hashPassword = await bcrypt.hash(password, 5);
         const userResponse = await dbQuery(
-            `INSERT INTO user (email, password) VALUES ($1, $2) RETURNING uuid, email`,
-            [email, hashPassword]
+            `INSERT INTO users (email, password, name) VALUES ($1, $2, $3) RETURNING uuid, email, name`,
+            [email, hashPassword, name]
         )
 
         if (userResponse?.rows?.[0]) {
@@ -36,8 +36,8 @@ class AuthService {
         }
     }
 
-    async login(email: string, password: string) {
-        const userResponse = await dbQuery('SELECT * FROM user WHERE email = $1', [email]);
+    async login(password: string, email: string) {
+        const userResponse = await dbQuery('SELECT * FROM users WHERE email = $1', [email]);
 
         if(!userResponse?.rows?.[0]) {
             throw ApiError.BadRequest('User with this email not found')
@@ -69,7 +69,7 @@ class AuthService {
     async refresh (refreshToken: string) {
         const refreshTokenAndUser = await tokenService.findRefreshToken(refreshToken);
         
-        const userDBResult = await dbQuery("SELECT * FROM user WHERE uuid = $1", [refreshTokenAndUser.user.uuid]);
+        const userDBResult = await dbQuery("SELECT * FROM users WHERE uuid = $1", [refreshTokenAndUser.user.uuid]);
         const user = userDBResult?.rows?.[0];
         if(!user) {
             throw ApiError.BadRequest("User not found");

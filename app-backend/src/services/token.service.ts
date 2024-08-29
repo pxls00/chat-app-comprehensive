@@ -2,12 +2,16 @@ import jwt from "jsonwebtoken"
 
 import config from "../config";
 import dbQuery from "../db";
+import redisClient from "../redis";
+
 import ApiError from "../utils/api-errors";
+
+const EXPIRE_REFRESH_TIME = 30 * 24 * 60 * 60
 
 class TokenService {
     generateTokens(payload: any) {
         const accessToken = jwt.sign(payload, config.JWT_ACCESS_TOKEN, {expiresIn: '30m'});
-        const refreshToken = jwt.sign(payload, config.JWT_REFRESH_TOKEN, {expiresIn: '30d'});
+        const refreshToken = jwt.sign(payload, config.JWT_REFRESH_TOKEN, {expiresIn: EXPIRE_REFRESH_TIME});
 
         return {
             accessToken,
@@ -33,20 +37,23 @@ class TokenService {
 
     async saveToken(userUuid: string, refreshToken:string) {
         try {
-            let token = await dbQuery('SELECT * FROM token WHERE user_uuid = $1', [userUuid])
+            // let token = await dbQuery('SELECT * FROM token WHERE user_uuid = $1', [userUuid])
+            await redisClient.set(`${userUuid}`, refreshToken, { EX: EXPIRE_REFRESH_TIME, GET: true })
+            let token = await redisClient.get(`${userUuid}`);
 
-            if(token?.rows?.[0]) {
-                token = await dbQuery('UPDATE token SET refresh_token = $1 where uuid = $2 RETURNING *', [
-                    refreshToken,
-                    token.rows[0].uuid,
-                ])
+            // token = 
+            // if(!!token) {
+                // token = await dbQuery('UPDATE token SET refresh_token = $1 where uuid = $2 RETURNING *', [
+                //     refreshToken,
+                //     token.rows[0].uuid,
+                // ])
 
-            } else {
-                token = await dbQuery('INSERT INTO token (user_uuid, refresh_token) VALUES ($1, $2) RETURNING *', [userUuid, refreshToken])
-            }
-            
-            if(token?.rows?.[0]) {
-                return token.rows[0]
+            // } else {
+                // token = await dbQuery('INSERT INTO token (user_uuid, refresh_token) VALUES ($1, $2) RETURNING *', [userUuid, refreshToken])
+            // }
+            console.log(token)
+            if(token) {
+                return token
             } else {
                 throw ApiError.ServerError("Internal Server error. Can not create a token")
             }
@@ -62,9 +69,10 @@ class TokenService {
             throw ApiError.BadRequest("Invalid token");
         }
 
-        const tokenFromDBResponse = await dbQuery("SELECT * FROM token WHERE user_uuid = $1", [user.uuid]);
-        const tokenFromDB = tokenFromDBResponse?.rows?.[0];
-
+        // const tokenFromDBResponse = await dbQuery("SELECT * FROM token WHERE user_uuid = $1", [user.uuid]);
+        // const tokenFromDB = tokenFromDBResponse
+        const tokenFromDB = await redisClient.get(`${user.uuid}`);
+        
         if(!tokenFromDB) {
             throw ApiError.UnathorizedError()
         }
@@ -77,7 +85,8 @@ class TokenService {
 
     async removeToken(refreshToken: string) {
         const { user } = await this.findRefreshToken(refreshToken);
-        await dbQuery('DELETE FROM token WHERE user_uuid = $1', [user.uuid]) 
+        // await dbQuery('DELETE FROM token WHERE user_uuid = $1', [user.uuid])
+        await redisClient.del(`${user.uuid}`) 
     }
     
 }

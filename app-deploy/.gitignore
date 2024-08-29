@@ -1,0 +1,8 @@
+node_modules/
+dist/
+test/
+helm/
+.git
+.cache
+data_local/
+.env

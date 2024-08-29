@@ -2,7 +2,7 @@ version: "3"
 
 services:
   # backend:
-  #   # image: "http-be"
+  #   # image: "chat-app-backend"
   #   build: "./"
   #   container_name: backend
   #   restart: always
@@ -21,11 +21,32 @@ services:
   #     postgres:
   #       condition: service_healthy
   #   networks:
-  #     - main
+  #     - chat-app
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: always
+    volumes:
+      - redis_volume_data:/data
+    ports:
+      - 6379:6379
+    networks:
+      - chat-app
+  
+  redis_insight:
+    image: redislabs/redisinsight:1.14.0
+    container_name: redis_insight
+    restart: always
+    ports:
+      - 8001:8001
+    volumes:
+      - redis_insight_volume_data:/db
+    networks:
+      - chat-app
 
   postgres:
     image: postgres:15
-    container_name: postgres
+    container_name: postgres-chat
     restart: always
     environment:
       - POSTGRES_PASSWORD=postgres
@@ -37,7 +58,7 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      main:
+      chat-app:
         aliases:
           - postgres
     volumes:  
@@ -46,7 +67,7 @@ services:
   
   pgadmin:
     image: "dpage/pgadmin4"
-    container_name: pgadmin
+    container_name: pgadmin-chat
     restart: on-failure
     depends_on:
       postgres:
@@ -60,13 +81,14 @@ services:
     volumes:
       - "./settings/pgadmin/servers.json:/pgadmin4/servers.json"
     networks:
-      - main
+      - chat-app
 
 volumes:
-  pgdata:
+  redis_volume_data:
+  redis_insight_volume_data:
 
 networks:
-  main:
+  chat-app:
     driver: bridge
     driver_opts:
       com.docker.network.enable_ipv6: "false"

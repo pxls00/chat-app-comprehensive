@@ -7,4 +7,6 @@ export default {
     DB_NAME: process.env.DB_NAME || "postgres",
     JWT_ACCESS_TOKEN: process.env.JWT_ACCESS_TOKEN || "access_key",
     JWT_REFRESH_TOKEN: process.env.JWT_REFRESH_TOKEN || "refresh_key",
+    REDIS_PORT: process.env.REDIS_PORT || 6379,
+    REDIS_HOST: process.env.REDIS_HOST || 'localhost',
   }

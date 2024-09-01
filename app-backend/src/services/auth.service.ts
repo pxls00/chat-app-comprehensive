@@ -23,7 +23,7 @@ class AuthService {
         if (userResponse?.rows?.[0]) {
             const userInstance = new UserDTO(userResponse.rows[0])
 
-            const userTokens = tokenService.generateTokens({...userInstance});
+            const userTokens = tokenService.generateTokens({...userInstance} as IUser);
 
             await tokenService.saveToken(userInstance.uuid, userTokens.refreshToken);
 
@@ -50,7 +50,7 @@ class AuthService {
 
         const userInstance = new UserDTO(userResponse.rows[0]);
         
-        const userTokens = tokenService.generateTokens({ ...userInstance });
+        const userTokens = tokenService.generateTokens({ ...userInstance } as IUser);
 
         await tokenService.saveToken(userInstance.uuid, userTokens.refreshToken);
 
@@ -76,7 +76,7 @@ class AuthService {
         }
 
         const userInstance = new UserDTO(user);
-        const userTokens = tokenService.generateTokens({...userInstance});
+        const userTokens = tokenService.generateTokens({...userInstance} as IUser);
 
         await tokenService.saveToken(userInstance.uuid, userTokens.refreshToken);
 

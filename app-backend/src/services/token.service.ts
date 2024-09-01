@@ -5,11 +5,12 @@ import dbQuery from "../db";
 import redisClient from "../redis";
 
 import ApiError from "../utils/api-errors";
+import { IUser } from "../dtos/user-dto/user-dto.types";
 
 const EXPIRE_REFRESH_TIME = 30 * 24 * 60 * 60
 
 class TokenService {
-    generateTokens(payload: any) {
+    generateTokens(payload: IUser) {
         const accessToken = jwt.sign(payload, config.JWT_ACCESS_TOKEN, {expiresIn: '30m'});
         const refreshToken = jwt.sign(payload, config.JWT_REFRESH_TOKEN, {expiresIn: EXPIRE_REFRESH_TIME});
 
@@ -19,9 +20,9 @@ class TokenService {
         }
     }
     
-    validateAccessToken(token: string) {
+    validateAccessToken(token: string): IUser | null {
         try {
-            return jwt.verify(token, config.JWT_ACCESS_TOKEN)
+            return jwt.verify(token, config.JWT_ACCESS_TOKEN) as IUser
         } catch (error) {
             return null;
         }

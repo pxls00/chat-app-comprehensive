@@ -1,6 +1,9 @@
 <template>
 <button 
-    class="text-dark bg-white py-[12px] px-[32px] rounded-[18px] transition ease-in-out duration-300"
+    :class="[
+      'text-dark bg-white transition ease-in-out duration-300',
+      props.size === 'medium' ? 'py-[8px] px-[26px] rounded-[14px]' : props.size === 'small' ? 'py-[6px] px-[20px] rounded-[10px]' : 'py-[12px] px-[32px] rounded-[18px]'
+    ]"
     :disabled='props.loading'
     :type="props.type"
     >
@@ -13,12 +16,14 @@
 import InfiniteSpinnerLoading from "@/assets/svg/infinite-spinner-animated-loading.svg?component";
 
 type TButtonPropsType = "button" | "submit" | "reset"
-type TButtonPropsColor = "green"
+type TButtonPropsSize = "large" | "medium" | "small"
+type TButtonPropsColor = "white" | "default" | "red"
 
 interface IAppButtonProps {
   type: TButtonPropsType,
   color: TButtonPropsColor,
   loading: boolean 
+  size?: TButtonPropsSize
 }
 
 const props = defineProps<IAppButtonProps>();

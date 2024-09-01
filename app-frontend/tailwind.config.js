@@ -36,12 +36,14 @@ module.exports = {
       'cyan': {
         '500': 'rgb(6 182 212)'
       },
-      'darkblue': 'rgba(79,70,229)',
+      'darkblue': '#0a1553',
+      'overlay': 'rgba(0, 0, 0, 0.2)',
       'black': "rgb(15 23 42)",
       'red': '#a11800',
       'green': '#03ad03',
       'white': "#ffffff",
-      'dark': "#000731"
+      'dark': "#000731",
+      'active-dark': "rgb(10 19 72)"
     }
   },
   plugins: [],

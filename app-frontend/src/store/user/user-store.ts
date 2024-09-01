@@ -15,6 +15,7 @@ export const useUserStore = defineStore({
 
   actions: {
     setUser (payload: IUser) {
+      console.log("set useer", payload)
       this.user = {
         email: payload.email || "",
         name: payload.name || "",
@@ -22,6 +23,7 @@ export const useUserStore = defineStore({
       };
     },
     resetUser () {
+      console.log("reset user")
       this.user = {
         email: "",
         name: "",

@@ -22,7 +22,7 @@
           @click="submitAuthLogin"
           :type="'submit'"
           :loading="loading"
-          :color="'green'">
+          :color="'white'">
           Sign in
         </AppButton>
       </div>
@@ -39,9 +39,9 @@ import $infra from "@/infrastructure/index";
 import $service from "@/service/index";
 
 import AuthForm from "./components/form/form.vue"
-import AppButton from "@/components/form-elements/app-button.vue";
+import AppButton from "@/components/app/app-button.vue";
 import AppField from "@/components/form-elements/app-field.vue";
-import AppInput from "@/components/form-elements/app-input.vue";
+import AppInput from "@/components/app/app-input.vue";
 import type { IAuthLoginRequest } from "@/infrastructure/auth/auth.types";
 
 

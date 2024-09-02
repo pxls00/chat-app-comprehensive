@@ -1,27 +1,6 @@
 version: "3"  
 
 services:
-  # backend:
-  #   # image: "chat-app-backend"
-  #   build: "./"
-  #   container_name: backend
-  #   restart: always
-  #   ports:
-  #     - "3000:3000"
-  #   environment:
-  #     - PORT=3000
-  #     - DB_USER=postgres
-  #     - DB_PASSWORD=postgres
-  #     - DB_HOST=localhost
-  #     - DB_PORT=5432
-  #     - DB_NAME=postgres
-  #     - JWT_ACCESS_TOKEN=learn_express_jwt_auth_access_secret_key
-  #     - JWT_REFRESH_TOKEN=learn_express_jwt_auth_refresh_secret_key
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
-  #   networks:
-  #     - chat-app
   redis:
     image: redis:latest
     container_name: redis
@@ -30,6 +9,11 @@ services:
       - redis_volume_data:/data
     ports:
       - 6379:6379
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1s
+      timeout: 2s
+      retries: 10
     networks:
       - chat-app
   
@@ -80,6 +64,46 @@ services:
       - "4434:4433"
     volumes:
       - "./settings/pgadmin/servers.json:/pgadmin4/servers.json"
+    networks:
+      - chat-app
+
+
+  backend:
+    # image: "chat-app-backend"
+    build: "../app-backend/"
+    container_name: backend
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_HOST=localhost
+      - DB_PORT=5432
+      - DB_NAME=postgres
+      - REDIS_PORT=6379
+      - REDIS_HOST=redis
+      - JWT_ACCESS_TOKEN=learn_express_jwt_auth_access_secret_key
+      - JWT_REFRESH_TOKEN=learn_express_jwt_auth_refresh_secret_key
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+
+    networks:
+      - chat-app
+  
+  frontend:
+    # image: "vue-main-host-image"
+    build: "../app-frontend/"
+    container_name: frontend
+    restart: always
+    ports:
+      - "8080:80"
+    environment:
+      - VITE_API_URL=${VITE_API_URL}
     networks:
       - chat-app
 

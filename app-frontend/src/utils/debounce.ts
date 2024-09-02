@@ -1,15 +1,12 @@
-export default function debounce<T extends (...args: any[]) => any>(func: T, delay: number) {
-  let timerId: any = null;
-
-  return function (...args: Parameters<T>) {
-    const context= this;
-
-    if (timerId!== null) {
-      clearTimeout(timerId);
-    }
-
-    timerId = setTimeout(() => {
-      func.apply(context, args);
-    }, delay);
-  };
+export default function debounce<Params extends any[]>(
+  func: (...args: Params) => any,
+  timeout: number,
+): (...args: Params) => void {
+  let timer: NodeJS.Timeout
+  return (...args: Params) => {
+    clearTimeout(timer)
+    timer = setTimeout(() => {
+      func(...args)
+    }, timeout)
+  }
 }

@@ -28,7 +28,7 @@
         <AppButton 
           :type="'submit'"
           :loading="loading"
-          :color="'green'">
+          :color="'default'">
           Sign up
         </AppButton>
       </div>

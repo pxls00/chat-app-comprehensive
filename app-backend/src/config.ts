@@ -10,7 +10,7 @@ export default {
   REDIS_PORT: process.env.REDIS_PORT || 6379,
   REDIS_HOST: process.env.REDIS_HOST || 'localhost',
   CORS_CONF: {
-    origin: 'http://localhost:8080',
+    origin: /http:\/\/localhost:.{4,5}/,
     credentials: true
   }
 }

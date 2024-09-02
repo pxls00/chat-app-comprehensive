@@ -2,6 +2,7 @@ import { Pool } from "pg";
 
 import config from "./config";
 
+console.log(config.DB_HOST)
 const pool = new Pool({
   user: config.DB_USER,
   password: config.DB_PASSWORD,

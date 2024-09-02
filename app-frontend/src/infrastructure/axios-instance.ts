@@ -7,7 +7,7 @@ import type { IAuthResponse } from "./auth/auth.types";
 export const VITE_API_URL = import.meta.env.VITE_API_URL;
 
 const instance: AxiosInstance = axios.create({
-  baseURL: VITE_API_URL,
+  baseURL: `${VITE_API_URL}/api`,
   withCredentials: true,
   // headers: {
     // 'Access-Control-Allow-Origin': "*"

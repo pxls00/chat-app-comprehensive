@@ -1,8 +1,9 @@
-version: "3"  
+# version: "3.8"  
 
 services:
   redis:
     image: redis:latest
+    profiles: ["prod", "dev"]
     container_name: redis
     restart: always
     volumes:
@@ -19,6 +20,7 @@ services:
   
   redis_insight:
     image: redislabs/redisinsight:1.14.0
+    profiles: ["dev"]
     container_name: redis_insight
     restart: always
     ports:
@@ -30,6 +32,7 @@ services:
 
   postgres:
     image: postgres:15
+    profiles: ["prod", "dev"]
     container_name: postgres-chat
     restart: always
     environment:
@@ -51,13 +54,14 @@ services:
   
   pgadmin:
     image: "dpage/pgadmin4"
+    profiles: ["dev"]
     container_name: pgadmin-chat
     restart: on-failure
     depends_on:
       postgres:
         condition: service_healthy
     environment:
-      - PGADMIN_DEFAULT_EMAIL=ltwixy@mail.com
+      - PGADMIN_DEFAULT_EMAIL=root@mail.com
       - PGADMIN_DEFAULT_PASSWORD=postgres
       - PGADMIN_LISTEN_PORT=4433
     ports:
@@ -69,6 +73,7 @@ services:
 
 
   backend:
+    profiles: ["prod", "dev"]
     # image: "chat-app-backend"
     build: "../app-backend/"
     container_name: backend
@@ -79,7 +84,7 @@ services:
       - PORT=3000
       - DB_USER=postgres
       - DB_PASSWORD=postgres
-      - DB_HOST=localhost
+      - DB_HOST=postgres
       - DB_PORT=5432
       - DB_NAME=postgres
       - REDIS_PORT=6379
@@ -87,9 +92,9 @@ services:
       - JWT_ACCESS_TOKEN=learn_express_jwt_auth_access_secret_key
       - JWT_REFRESH_TOKEN=learn_express_jwt_auth_refresh_secret_key
     depends_on:
-      redis:
-        condition: service_healthy
       postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
 
     networks:
@@ -97,6 +102,7 @@ services:
   
   frontend:
     # image: "vue-main-host-image"
+    profiles: ["prod"]
     build: "../app-frontend/"
     container_name: frontend
     restart: always

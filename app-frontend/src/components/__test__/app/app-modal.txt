@@ -1,0 +1,103 @@
+import {describe, beforeEach, afterEach, expect, it} from "vitest";
+import { DOMWrapper, mount, type VueWrapper } from '@vue/test-utils'
+import AppModal from '@/components/app/app-modal.vue'
+
+// Mock the SVG import
+// jest.mock('@/assets/svg/infinite-spinner-animated-loading.svg?component', () => ({
+  // render: () => {},
+// }));
+
+describe('AppModal.vue', () => {
+  let wrapper: VueWrapper;
+
+  const modalDefaultSlotContent = 'Modal content';
+  
+  // beforeAll(() => {
+   
+  // })
+
+  beforeEach(() => {
+    const el = document.createElement('div')
+    el.id = 'modals'
+    document.body.appendChild(el)
+  })
+
+
+  afterEach(() => {
+    // clean up
+    // wrapper.vm.$forceUpdate()
+    document.body.innerHTML = ''
+  })
+
+  // beforeEach(() => {
+  //   const mockBody = document.createElement('body')
+  //   jest.spyOn(document.body, "append").mockImplementation(() => mockBody)
+  // })
+
+  it('is modal properly rendering', () => {
+    wrapper = mount(AppModal, {
+      props: {
+        isOpen: true,
+      },
+      slots: {
+        default: modalDefaultSlotContent
+      }
+    })
+    // const modal = wrapper.find('[data-test-id="app-modal"]')
+    
+    const modal = document.body.querySelector('[data-test-id="app-modal"]')
+    // jest.spyOn(document.body, 'appendChild');
+
+    console.log(modal)
+    // expect(document.body.innerHTML.includes(modal?.getAttribute("data-test-id") as string)).toBe(true);
+    expect(modal?.innerHTML.includes(modalDefaultSlotContent)).toBe(true);
+    // const modalContainer = document.body.querySelector('[data-test-id="app-modal"]')
+    // expect(modalContainer).toBeTruthy()
+
+    // console.log(modalContainer);
+    // console.log(wrapper.html(), docuemnt.querySelect("body").innerHTML());
+    // expect(modal)
+  })
+
+  // test('is modal properly rendering slot', () => {
+    // const modal = wrapper.find('[data-test-id="app-modal"]');
+
+    // expect(modal.html()).toContain(modalDefaultSlotContent);
+  // })
+
+  // test('is modal properly closing', async () => {
+  //   wrapper = mount(AppModal, {
+  //     props: {
+  //       isOpen: true,
+  //     },
+  //     slots: {
+  //       default: modalDefaultSlotContent
+  //     }
+  //   })
+  // //   // const modal = wrapper.find('[data-test-id="app-modal"]');
+  // //   // const modalCloseBtn = wrapper.find('app-modal-close-btn');
+  //   const modal = document.body.querySelector('[data-test-id="app-modal"]') as HTMLDivElement
+  //   const modalCloseBtn = modal.querySelector('[data-test-id="app-modal-close-btn"]') as HTMLDialogElement
+  //   const modalCloseBtnWrapper = new DOMWrapper(modalCloseBtn)
+  // //   // await modalCloseBtn.trigger("click");
+  //   await modalCloseBtnWrapper.trigger("click");
+  // //   // expect(wrapper.props('isOpen')).toBe(false)
+  //   console.log(wrapper.props('isOpen'));
+  //   await wrapper.vm.$nextTick()
+  //   console.log(document.body.innerHTML, wrapper.text());
+  // //   // expect(modal.exists()).toBe(false);
+  // })
+
+  // test('is modal properly closing with overlay', async () => {
+  //   const modal = wrapper.find('[data-test-id="app-modal"]');
+  //   const modalCloseOverlay = wrapper.find('app-modal-close-overlay');
+    
+  //   await modalCloseOverlay.trigger("click");
+  //   expect(wrapper.props('isOpen')).toBe(false)
+    
+  //   await wrapper.vm.$nextTick()
+  //   expect(modal.exists()).toBe(false);
+  // })
+
+
+})

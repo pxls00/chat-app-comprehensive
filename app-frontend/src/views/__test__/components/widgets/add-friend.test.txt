@@ -1,0 +1,201 @@
+// // AddFriend.test.js
+// import { describe, it, expect, vi, beforeEach } from 'vitest';
+// import { mount } from '@vue/test-utils';
+// import AddFriend from '../../../main/components/widgets/add-friend.vue'; // Adjust the path according to your file structure
+// import { useMessageStore } from '@/store/message/message-store';
+// import socket from '@/socket';
+// import { useVuelidate } from '@vuelidate/core';
+
+// // Mock the socket module
+// vi.mock('@/socket', () => ({
+//   default: {
+//     emit: vi.fn(),
+//   },
+// }));
+
+// // Mock the message store
+// vi.mock('@/store/message/message-store', () => ({
+//   useMessageStore: vi.fn(),
+// }));
+
+// // Mock Vuelidate
+// vi.mock('@vuelidate/core', () => ({
+//   useVuelidate: vi.fn(),
+// }));
+
+// describe('AddFriend.vue', () => {
+//   let messageStoreMock:any;
+//   let vuelidateMock: any;
+
+//   beforeEach(() => {
+//     // Mock implementation of the message store
+//     messageStoreMock = {
+//       chatList: [],
+//       setChatList: vi.fn(),
+//     };
+
+//     // Create a deep mock for Vuelidate
+//     vuelidateMock = {
+//       value: {
+//         email: {
+//           $error: false,
+//           $errors: [],
+//           $reset: vi.fn(),
+//           $message: '',
+//         },
+//         $validate: vi.fn().mockResolvedValue(true),
+//         $reset: vi.fn(),
+//       },
+//     };
+
+//     // Set up the mock returns
+//     useMessageStore.mockReturnValue(messageStoreMock);
+//     useVuelidate.mockReturnValue(vuelidateMock);
+
+//     // Reset the socket emit mock before each test
+//     socket.emit.mockReset();
+//   });
+
+//   it('should open the add friend modal when the button is clicked', async () => {
+//     // Mount the component with stubs for child components
+//     const wrapper = mount(AddFriend, {
+//       global: {
+//         stubs: {
+//           AppModal: { template: '<div><slot></slot></div>' },
+//           AppInput: { template: '<input />' },
+//           AppField: { template: '<div><slot></slot></div>' },
+//           AppButton: { template: '<button @click="$emit(`click`)"><slot></slot></button>' },
+//         },
+//       },
+//     });
+
+//     // Find and click the "Add Friend" button
+//     const button = wrapper.findComponent({ name: 'AppButton' });
+//     expect(button.exists()).toBe(true);
+//     await button.trigger('click');
+
+//     // Check if the modal is opened
+//     expect(wrapper.vm.isOpenAddFriendModal).toBe(true);
+//   });
+
+//   it('should close the add friend modal and reset the form when closeAddFriendModal is called', async () => {
+//     // Mount the component
+//     const wrapper = mount(AddFriend, {
+//       global: {
+//         stubs: {
+//           AppModal: { template: '<div><slot></slot></div>' },
+//           AppInput: { template: '<input />' },
+//           AppField: { template: '<div><slot></slot></div>' },
+//           AppButton: { template: '<button @click="$emit(`click`)"><slot></slot></button>' },
+//         },
+//       },
+//     });
+
+//     // Simulate opening the modal
+//     wrapper.vm.openAddFriendModal();
+//     await wrapper.vm.$nextTick();
+
+//     // Simulate closing the modal
+//     await wrapper.vm.closeAddFriendModal();
+
+//     // Verify that the modal is closed and the form is reset
+//     expect(wrapper.vm.isOpenAddFriendModal).toBe(false);
+//     expect(wrapper.vm.formFields.email).toBe('');
+//     expect(vuelidateMock.value.$reset).toHaveBeenCalled();
+//   });
+
+//   it('should handle the form submission and socket response correctly', async () => {
+//     // Mount the component
+//     const wrapper = mount(AddFriend, {
+//       global: {
+//         stubs: {
+//           AppModal: { template: '<div><slot></slot></div>' },
+//           AppInput: { template: '<input />' },
+//           AppField: { template: '<div><slot></slot></div>' },
+//           AppButton: { template: '<button @click="$emit(`click`)"><slot></slot></button>' },
+//         },
+//       },
+//     });
+
+//     // Open the modal and set a valid email
+//     wrapper.vm.openAddFriendModal();
+//     await wrapper.vm.$nextTick();
+//     wrapper.vm.formFields.email = 'test@example.com';
+
+//     // Trigger form submission
+//     await wrapper.find('form').trigger('submit.prevent');
+
+//     // Check that the socket emit function was called with the correct data
+//     expect(socket.emit).toHaveBeenCalledWith(
+//       'add_friend',
+//       'test@example.com',
+//       expect.any(Function) // The callback function handling the socket response
+//     );
+
+//     // Simulate the socket response callback
+//     const emitCallback = socket.emit.mock.calls[0][2];
+//     emitCallback({ error: '', done: true, friendItem: { email: 'test@example.com', id: 'friend1' } });
+
+//     // Check that the messageStore's setChatList function was called with the new friend
+//     expect(messageStoreMock.setChatList).toHaveBeenCalledWith([{ email: 'test@example.com', id: 'friend1' }]);
+//   });
+
+//   it('should display validation errors when the form is invalid', async () => {
+//     // Mock Vuelidate validation to fail
+//     vuelidateMock.value.$validate.mockResolvedValue(false);
+//     vuelidateMock.value.email.$error = true;
+//     vuelidateMock.value.email.$errors = [{ $message: 'Invalid email address' }];
+
+//     // Mount the component
+//     const wrapper = mount(AddFriend, {
+//       global: {
+//         stubs: {
+//           AppModal: { template: '<div><slot></slot></div>' },
+//           AppInput: { template: '<input />' },
+//           AppField: { template: '<div><slot></slot></div>' },
+//           AppButton: { template: '<button @click="$emit(`click`)"><slot></slot></button>' },
+//         },
+//       },
+//     });
+
+//     // Set the email to an invalid value and submit the form
+//     wrapper.vm.formFields.email = 'invalid-email';
+//     await wrapper.find('form').trigger('submit.prevent');
+
+//     // Check that the form did not emit anything due to validation failure
+//     expect(socket.emit).not.toHaveBeenCalled();
+
+//     // Check that the error message is displayed
+//     expect(wrapper.find('.modal-content').text()).toContain('Invalid email address');
+//   });
+
+//   it('should display an error message when the socket returns an error', async () => {
+//     // Mount the component
+//     const wrapper = mount(AddFriend, {
+//       global: {
+//         stubs: {
+//           AppModal: { template: '<div><slot></slot></div>' },
+//           AppInput: { template: '<input />' },
+//           AppField: { template: '<div><slot></slot></div>' },
+//           AppButton: { template: '<button @click="$emit(`click`)"><slot></slot></button>' },
+//         },
+//       },
+//     });
+
+//     // Open the modal and set a valid email
+//     wrapper.vm.openAddFriendModal();
+//     await wrapper.vm.$nextTick();
+//     wrapper.vm.formFields.email = 'test@example.com';
+
+//     // Submit the form
+//     await wrapper.find('form').trigger('submit.prevent');
+
+//     // Simulate a socket error response
+//     const emitCallback = socket.emit.mock.calls[0][2];
+//     emitCallback({ error: 'User not found', done: false, friendItem: null });
+
+//     // Check that the error message is set correctly
+//     expect(wrapper.vm.formFieldsEmailExistedError).toBe('User not found');
+//     expect(wrapper.find('.modal-content').text()).toContain('User not found');
+//   });
+// });

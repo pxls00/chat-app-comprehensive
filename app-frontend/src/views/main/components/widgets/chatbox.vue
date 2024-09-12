@@ -59,6 +59,3 @@ function submitMessage() {
 }
 
 </script>
-
-write a callback function where we call setMessageList with actualMessagePayload.
-and make the same addFriend emit's as dm to addFriend

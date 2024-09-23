@@ -3,7 +3,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
-RUN npm run build
+RUN npm run build-only
 
 FROM nginx:1.24.0 as production
 WORKDIR /var/www/html
